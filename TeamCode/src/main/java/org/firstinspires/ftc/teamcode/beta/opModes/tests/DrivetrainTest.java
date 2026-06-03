@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.beta.opModes.scripts;
+package org.firstinspires.ftc.teamcode.beta.opModes.tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.beta.opModes.tuning;
+package org.firstinspires.ftc.teamcode.beta.opModes.tests;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -27,28 +27,17 @@ import dev.nextftc.control.KineticState;
  */
 
 @Configurable
-@TeleOp(name = "Flywheel Tuner", group = "Tuning")
-public class FlywheelTuner extends OpMode {
+@TeleOp(name = "Velocity Test", group = "Test")
+public class VelocityTest extends OpMode {
 
     // ── Configurable parameters ────────────────────────────────────────────-
 
     public static double SETPOINT = 800;
 
-    public static double kV = 0;
-    public static double kA = 0;
-    public static double kS = 0;
-
-    public static double kP = 0;
-    public static double kI = 0;
-    public static double kD = 0;
-
     // ── Estado interno ──────────────────────────────────────────────────────
 
     private List<LynxModule> hubs;
     private Outtake outtake;
-    private ControlSystem controlSystem;
-
-    private final ElapsedTime timer = new ElapsedTime();
     private final TelemetryManager graph = PanelsTelemetry.INSTANCE.getTelemetry();
 
     // ── Ciclo de vida ───────────────────────────────────────────────────────
@@ -59,15 +48,12 @@ public class FlywheelTuner extends OpMode {
         hubs.forEach(h -> h.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL));
 
         outtake = new Flywheel(hardwareMap);
-        controlSystem = buildControlSystem();
-        timer.reset();
     }
 
     @Override
     public void loop() {
         hubs.forEach(LynxModule::clearBulkCache);
-        buildControlSystem();
-        outtake.setPower(controlSystem.calculate());
+        outtake.setVelocity(SETPOINT);
         updateTelemetry();
     }
 
@@ -77,15 +63,6 @@ public class FlywheelTuner extends OpMode {
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────
-
-    private ControlSystem buildControlSystem() {
-        ControlSystem cs = ControlSystem.builder()
-                .velPid(kP, kI, kD)
-                .basicFF(kV, kA, kS)
-                .build();
-        cs.setGoal(new KineticState(0, SETPOINT));
-        return cs;
-    }
 
     private void updateTelemetry() {
         double vel = outtake.getVelocity();

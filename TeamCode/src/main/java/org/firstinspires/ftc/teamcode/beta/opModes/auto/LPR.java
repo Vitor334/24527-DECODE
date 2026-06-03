@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.beta.opModes.auto.blue;
+package org.firstinspires.ftc.teamcode.beta.opModes.auto;
 
 import static com.pedropathing.ivy.Scheduler.schedule;
 
@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.beta.data.StrategyBuilder;
 import org.firstinspires.ftc.teamcode.beta.subsystems.RobotAPI;
 import org.firstinspires.ftc.teamcode.beta.utils.Alliance;
 
-@Autonomous(name = "[BLUE] Low Preload", group = "Low")
-public class LowPreload extends LinearOpMode {
+@Autonomous(name = "[RED] Low Preload", group = "Low")
+public class LPR extends LinearOpMode {
 
     @Override
     public void runOpMode() {
@@ -24,13 +24,13 @@ public class LowPreload extends LinearOpMode {
         Scheduler.reset();
 
         Follower follower = PedroConfig.createFollower(hardwareMap);
-        follower.setStartingPose(FieldConfig.lowStart(Alliance.BLUE));
+        follower.setStartingPose(FieldConfig.lowStart(Alliance.RED));
         follower.update();
 
-        RobotAPI robot = new RobotAPI(hardwareMap, follower.getPoseTracker(), Alliance.BLUE);
+        RobotAPI robot = new RobotAPI(hardwareMap, follower.getPoseTracker(), Alliance.RED);
         robot.update();
 
-        StrategyBuilder builder = new StrategyBuilder(robot, follower, Alliance.BLUE);
+        StrategyBuilder builder = new StrategyBuilder(robot, follower, Alliance.RED);
         Command strategy = builder.lowPreload();
 
         waitForStart();
@@ -43,7 +43,7 @@ public class LowPreload extends LinearOpMode {
             robot.update();
 
             if (strategy.done()) {
-                ReadWriteData.write(Alliance.BLUE, follower.getPose());
+                ReadWriteData.write(Alliance.RED, follower.getPose());
                 requestOpModeStop();
             }
         }

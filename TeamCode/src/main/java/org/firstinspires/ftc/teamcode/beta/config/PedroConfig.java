@@ -35,10 +35,10 @@ public class PedroConfig {
      */
     @Sorter(sort = 4)
     public static PIDFCoefficients translationalPIDF = new PIDFCoefficients(
-            0.08,
+            0.1,
             0,
-            0.008,
-            0.02
+            0.015,
+            0.05
     );
 
     /**
@@ -47,10 +47,10 @@ public class PedroConfig {
      */
     @Sorter(sort = 5)
     public static PIDFCoefficients headingPIDF = new PIDFCoefficients(
-            1.6,
+            1.2,
             0,
-            0.04,
-            0.02
+            0.1,
+            0.015
     );
 
     /**
@@ -60,11 +60,11 @@ public class PedroConfig {
      */
     @Sorter(sort = 6)
     public static FilteredPIDFCoefficients drivePIDF = new FilteredPIDFCoefficients(
-            0.02,
+            0.015,
             0,
-            0.002,
+            0.001,
             0.6,
-            0.01
+            0.05
     );
 
     /**
@@ -74,10 +74,10 @@ public class PedroConfig {
      */
     @Sorter(sort = 7)
     public static PIDFCoefficients secondaryTranslationalPIDF = new PIDFCoefficients(
-            0.15,
+            0.0015,
             0,
-            0.01,
-            0
+            0.0015,
+            0.01
     );
 
     /**
@@ -86,9 +86,9 @@ public class PedroConfig {
      */
     @Sorter(sort = 8)
     public static PIDFCoefficients secondaryHeadingPIDF = new PIDFCoefficients(
-            3.4,
-            0,
             0.2,
+            0,
+            0.1,
             0
     );
 
@@ -107,28 +107,18 @@ public class PedroConfig {
     );
 
     /**
-     * Coefficients for predictive braking. These parameters help the robot
-     * anticipate the need to slow down to minimize overshoot and improve
-     * end-of-path accuracy.
-     */
-    @Sorter(sort = 10)
-    public static PredictiveBrakingCoefficients predictiveBraking = new PredictiveBrakingCoefficients(
-            0.1, 0.04, 0.0016
-    );
-
-    /**
      * Configuration constants for the Pedro Pathing follower, including mass,
      * PIDF coefficients for translational and heading control, Kalman filter settings,
      * and centripetal scaling parameters.
      */
     @Sorter(sort = 0)
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(15)
+            .mass(12.5)
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
             .useSecondaryDrivePIDF(true)
-            .forwardZeroPowerAcceleration(-54.9716)
-            .lateralZeroPowerAcceleration(-83.8002)
+            .forwardZeroPowerAcceleration(-30.46855240)
+            .lateralZeroPowerAcceleration(-89.08834036)
             .translationalPIDFCoefficients(translationalPIDF)
             .secondaryTranslationalPIDFCoefficients(secondaryTranslationalPIDF)
             .headingPIDFCoefficients(headingPIDF)
@@ -138,7 +128,6 @@ public class PedroConfig {
             .driveKalmanFilterModelCovariance(6)
             .driveKalmanFilterDataCovariance(1)
             .centripetalScaling(0.005);
-            //.predictiveBrakingCoefficients(predictiveBraking);
 
     /**
      * Configuration for the mecanum drivetrain, including motor hardware names,
@@ -154,8 +143,8 @@ public class PedroConfig {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .yVelocity(69.5206)
-            .xVelocity(42.4016)
+            .yVelocity(64.72830752)
+            .xVelocity(85.19865405)
             .maxPower(1);
 
     /**

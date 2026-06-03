@@ -42,6 +42,12 @@ public class Flywheel implements Outtake {
     }
 
     @Override
+    public void setVelocity(double velocity) {
+        leftFlywheel.setVelocity(velocity);
+        rightFlywheel.setVelocity(velocity);
+    }
+
+    @Override
     public void release() {
         gate.setPosition(RobotConfig.GATE_OPEN);
     }

@@ -12,6 +12,8 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Curve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
+import com.pedropathing.ivy.commands.Commands;
+import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 
 import org.firstinspires.ftc.teamcode.beta.config.FieldConfig;
@@ -63,65 +65,53 @@ public class StrategyBuilder {
 
     // ------ PUBLIC API --------------------------------------------------------------------------
 
+    private static double FAR_VEL = 1650;
+    private static double IDLE    = 1000;
+
     public Command lowPreload() {
         return sequential(
                 followPath(lowStart, lowShot),
-                // TODO: Add shooting command
+                robot.shoot(FAR_VEL, 6000, 0.35),
                 followPath(lowShot, lowPark)
         );
     }
 
     public Command lowMain() {
         return sequential(
-                followPath(lowStart, lowShot),
-                // TODO: Add shooting command       (1)
-                followIntake(lowShot, humanPlayer), // Intake (1)
-                followPath(humanPlayer, lowShot),
-                // TODO: Add shooting command       (2)
-                followPath(lowShot, preMidRow),
-                followIntake(preMidRow, midRow),    // Intake (2)
-                followPath(midRow, preGate),
-                followPath(preGate, gate),          // Gate
-                waitMs(600),
-                followPath(gate, lowShot),
-                // TODO: Add shooting command       (3)
-                followPath(lowShot, preLowRow),
-                followIntake(preLowRow, lowRow),    // Intake (3)
-                followPath(lowRow, lowShot),
-                // TODO: Add shooting command       (4)
-                followPath(lowShot, preUpRow),
-                followIntake(preUpRow, upRow),      // Intake (4)
-                followPath(upRow, lowShot),
-                // TODO: Add shooting command       (5)
-                followPath(lowShot, lowPark)
-        );
-    }
-
-    public Command lowCycle() { // Requires PPG inside robot
-        return sequential(
-                followPath(lowStart, lowShot),
-                // TODO: Add shooting command       (1)
-                followPath(lowShot, preMidRow),
-                // TODO: Add intake command
-                followPath(preMidRow, midRow),
-                followPath(midRow, lowShot),
-                // TODO: Add shooting command       (2)
-                followPath(lowShot, preLowRow),
-                // TODO: Add intake command
-                followPath(preLowRow, lowRow),
-                followPath(lowRow, lowShot),
-                // TODO: Add shooting command       (3)
-                followPath(lowShot, humanPlayer),
-                // TODO: Add intake command
-                followPath(humanPlayer, lowShot),
-                repeat(
-                        sequential(
-                                // TODO: Add shooting command       (Setup)
-                                followPath(lowShot, cycle),
-                                // TODO: Add intake command
-                                followPath(cycle, lowShot)
-                        ), 3
+                deadline(
+                        followPath(lowStart, lowShot),
+                        robot.run(2150)
                 ),
+                robot.shoot(FAR_VEL, 3500, 0.35),
+                deadline(
+                        sequential(
+                                followPath(lowShot, preMidRow),
+                                followPath(preMidRow, midRow)
+                        ),
+                        robot.intakeCommand,
+                        robot.run(FAR_VEL + 150)
+                ),
+                deadline(
+                        sequential(
+                                followPath(midRow, preMidRow),
+                                followPath(preLowRow, lowShot)
+                        ),
+                        robot.run(FAR_VEL + 150)
+                ),
+                robot.shoot(FAR_VEL, 2000, 0.35),
+                deadline(
+                        sequential(
+                                followPath(lowShot, preLowRow),
+                                followPath(preLowRow, lowRow)
+                        ),
+                        robot.intakeCommand,
+                        robot.run(FAR_VEL + 150)
+                ),
+                deadline(
+                        followPath(lowRow, lowShot),
+                        robot.run(FAR_VEL + 150)
+                ),
+                robot.shoot(FAR_VEL, 2000, 0.35),
                 followPath(lowShot, lowPark)
         );
     }
@@ -138,10 +128,21 @@ public class StrategyBuilder {
         return follow(this.follower, pathChain);
     }
 
-    private Command followIntake(Pose... poses) {
-        return deadline(
-                followPath(poses),
-                robot.intakeCommand
-        );
+    private PathChain linear(Pose... poses) {
+        if (poses.length <= 1) throw new IllegalArgumentException("Please give at least two poses");
+        Curve path = poses.length == 2? new BezierLine(poses[0], poses[1]) : new BezierCurve(poses);
+        return follower.pathBuilder()
+                .addPath(path)
+                .setLinearHeadingInterpolation(poses[0].getHeading(), poses[poses.length - 1].getHeading())
+                .build();
+    }
+
+    private PathChain constant(double heading, Pose... poses) {
+        if (poses.length <= 1) throw new IllegalArgumentException("Please give at least two poses");
+        Curve path = poses.length == 2? new BezierLine(poses[0], poses[1]) : new BezierCurve(poses);
+        return follower.pathBuilder()
+                .addPath(path)
+                .setConstantHeadingInterpolation(heading)
+                .build();
     }
 }

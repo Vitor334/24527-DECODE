@@ -6,4 +6,5 @@ public interface Outtake {
     void block();
     double getVelocity();
     boolean isAtVelocity(double velocity, double tolerance);
+    void setVelocity(double velocity);
 }

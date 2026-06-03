@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.legacy.opModes.teleop.dependencies.IntakeM
 import org.firstinspires.ftc.teamcode.legacy.opModes.teleop.dependencies.IntakeReverse;
 import org.firstinspires.ftc.teamcode.legacy.opModes.teleop.dependencies.Launcher;
 
-@TeleOp(name = "TeleOp Nacional", group = "Legacy")
+@TeleOp(name = "TeleOp Nacional", group = "Main")
 public class TeleOpp extends OpMode {
 
     private Launcher launcher;

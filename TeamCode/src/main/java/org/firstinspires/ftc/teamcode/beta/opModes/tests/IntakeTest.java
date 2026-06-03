@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.beta.opModes.scripts;
+package org.firstinspires.ftc.teamcode.beta.opModes.tests;
 
 import static com.pedropathing.ivy.commands.Commands.branch;
 

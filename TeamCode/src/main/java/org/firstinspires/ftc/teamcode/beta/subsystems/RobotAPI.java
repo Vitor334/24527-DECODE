@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.beta.subsystems;
 
-import static com.pedropathing.ivy.groups.Groups.sequential;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.*;
 
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
@@ -17,81 +18,24 @@ import org.firstinspires.ftc.teamcode.beta.subsystems.ports.Intake;
 import org.firstinspires.ftc.teamcode.beta.subsystems.ports.Outtake;
 import org.firstinspires.ftc.teamcode.beta.subsystems.ports.Vision;
 import org.firstinspires.ftc.teamcode.beta.utils.Alliance;
-import org.firstinspires.ftc.teamcode.beta.utils.Timeout;
 
-import java.util.function.Function;
+import java.util.EnumMap;
 
 import dev.nextftc.control.ControlSystem;
-import dev.nextftc.control.KineticState;
 
 public class RobotAPI {
 
-    // TODO: Add Manual power shot
+    // TODO: remove update()
 
-    // Hardware
-    private final Outtake outtake;
-    private final Intake intake;
-    private final Vision vision;
+    // ------ Intake ------------------------------------------------------------------------------
 
-    // Control variables
-    private double power = 0;
-    private final Pose goal;
-    private final PoseTracker poseTracker;
-    private final ControlSystem flywheelController;
-    private final Function<Double, Double> interpolator;
-    private final Timeout spinupTimeout;
-    private final Timeout transferTimeout;
+    private Intake intake;
+    public Command intakeCommand;
+    public Command outtakeCommand;
 
-    // Private commands (primitivos — sem dependência de outros commands)
-    private final Command spinup;
-    private final Command transfer;
+    private void setupIntake(HardwareMap hardwareMap) {
 
-    // Public commands
-    public final Command intakeCommand;
-    public final Command outtakeCommand;
-    public final Command idleFlywheel;
-    public final Command shootCommand;
-    public final Command nearShotCommand; // TODO -> Ajustar comandos de tiro
-
-    public RobotAPI(HardwareMap hardwareMap, PoseTracker poseTracker, Alliance alliance) {
-        // 1. Hardware
-        this.outtake = new Flywheel(hardwareMap);
         this.intake = new RubberBand(hardwareMap);
-        this.vision = new Limelight(hardwareMap, alliance);
-        this.goal = alliance == Alliance.BLUE ? FieldConfig.BLUE_GOAL : FieldConfig.RED_GOAL;
-        this.poseTracker = poseTracker;
-
-        // 2. Controle (não dependem de commands)
-        this.flywheelController = RobotConfig.controller();
-        this.interpolator = RobotConfig.interpolator();
-        this.spinupTimeout = new Timeout(
-                () -> this.outtake.isAtVelocity(RobotConfig.SPINUP_THRESHOLD, 100),
-                RobotConfig.SPINUP_TIMEOUT
-        );
-        this.transferTimeout = new Timeout(
-                () -> false,
-                RobotConfig.TRANSFER_TIMEOUT
-        );
-
-        // 3. Commands primitivos (dependem apenas de hardware e timeouts)
-        this.spinup = Command.build()
-                .setExecute(() -> this.outtake.setPower(this.power))
-                .setDone(spinupTimeout::check)
-                .setEnd(endCondition -> this.outtake.release())
-                .setConflictBehavior(ConflictBehavior.OVERRIDE)
-                .setPriority(1)
-                .requiring(outtake);
-
-        this.transfer = Command.build()
-                .setExecute(() -> this.intake.setPower(RobotConfig.TRANSFER_SPEED))
-                .setDone(transferTimeout::check)
-                .setEnd(endCondition -> {
-                    intake.setPower(0);
-                    outtake.block();
-                })
-                .setConflictBehavior(ConflictBehavior.OVERRIDE)
-                .setPriority(1)
-                .requiring(intake);
 
         this.intakeCommand = Command.build()
                 .setExecute(() -> this.intake.setPower(1))
@@ -106,35 +50,167 @@ public class RobotAPI {
                 .setConflictBehavior(ConflictBehavior.OVERRIDE)
                 .setPriority(0)
                 .requiring(intake);
-
-        this.idleFlywheel = Command.build()
-                .setExecute(() -> this.outtake.setPower(this.power * 0.3))
-                .setEnd(endCondition -> this.outtake.setPower(0))
-                .setConflictBehavior(ConflictBehavior.CANCEL)
-                .setPriority(0)
-                .requiring(outtake);
-
-        // 4. Commands compostos (dependem de spinup e transfer — devem vir por último)
-        this.shootCommand = sequential(this.spinup, this.transfer);
-        this.nearShotCommand = sequential(this.spinup, this.transfer);
     }
 
-    // PUBLIC API
+    public Command transfer(double power) {
+        return Command.build()
+                .setExecute(() -> this.intake.setPower(power))
+                .setEnd(endCondition -> this.intake.setPower(0))
+                .setConflictBehavior(ConflictBehavior.OVERRIDE)
+                .setPriority(1)
+                .requiring(intake);
+    }
 
-    public void update() {
-        double distance = poseTracker.getPose().distanceFrom(goal);
-        KineticState setpoint = new KineticState(0, interpolator.apply(distance));
-        flywheelController.setGoal(setpoint);
-        power = flywheelController.calculate();
+    // ------ Outtake -----------------------------------------------------------------------------
+
+    private Outtake outtake;
+    private final EnumMap<OuttakeState, Command> cases = new EnumMap<>(OuttakeState.class);
+    private OuttakeState currentState = OuttakeState.IDLE;
+    public Command shootCommand;
+    public Command idle;
+
+    private void buildOuttake(HardwareMap hardwareMap) {
+
+        this.outtake = new Flywheel(hardwareMap);
+        outtake.block();
+
+        this.idle = infinite(() -> this.outtake.setPower(this.power * 0.3)).requiring(this.outtake);
+
+        cases.put(OuttakeState.IDLE, idle);
+        cases.put(OuttakeState.SHOOTING, idle);
+        shootCommand = match(() -> currentState, cases);
+    }
+
+    public Command run(double velocity) {
+        return Command.build()
+                .setExecute(() -> this.outtake.setVelocity(velocity))
+                .setEnd(endCondition -> this.outtake.setPower(0))
+                .setConflictBehavior(ConflictBehavior.OVERRIDE)
+                .setPriority(0)
+                .requiring(outtake);
+    }
+
+    public Command shoot(double targetVelocity) {
+        return deadline(
+                sequential(
+                        waitMs(RobotConfig.SPINUP_TIMEOUT),
+                        instant(() -> outtake.release()),
+                        waitMs(10),
+                        deadline(
+                                waitMs(RobotConfig.TRANSFER_TIMEOUT),
+                                transfer(RobotConfig.TRANSFER_SPEED)
+                        ),
+                        instant(() -> outtake.block()),
+                        waitMs(10)
+                ),
+                run(targetVelocity)
+        );
+    }
+
+    public Command shoot(double targetVelocity, double timeout, double transferPower) {
+        return deadline(
+                sequential(
+                        waitMs(timeout),
+                        instant(() -> outtake.release()),
+                        waitMs(10),
+                        deadline(
+                                waitMs(RobotConfig.TRANSFER_TIMEOUT),
+                                transfer(transferPower)
+                        ),
+                        instant(() -> outtake.block()),
+                        waitMs(10)
+                ),
+                run(targetVelocity)
+        );
+    }
+
+    public double vel() {return outtake.getVelocity();}
+
+    // ------ Vision ------------------------------------------------------------------------------
+
+    private final Vision vision;
+
+    public Double rawVisionAngle() {
+        Double tx = vision.getTx();
+        if (tx == null) return null;
+        Pose pose = poseTracker.getPose();
+        double heading = pose.getHeading();
+        return heading + tx;
+    }
+
+    public Double rawPoseAngle() {
+        Pose pose = poseTracker.getPose();
+        return Math.atan2(goal.getY() - pose.getY(),
+                          goal.getX() - pose.getX());
     }
 
     public double getAngle() {
-        //Double tx = vision.getTx();
-        //if (tx != null) {
-        //    return tx;
-        //}
+        double odometryAngle = rawPoseAngle();
 
-        Pose currentPose = poseTracker.getPose();
-        return Math.atan2(goal.getY() - currentPose.getY(), goal.getX() - currentPose.getX());
+        Double tx = vision.getTx();
+        if (tx == null) {
+            return odometryAngle;
+        }
+
+        double visionAngle = rawVisionAngle();
+
+        double confidence = 1.0 - (Math.abs(tx) / 20);
+        double alpha = 0.35 * confidence;
+
+        return blend(visionAngle, odometryAngle, alpha);
+    }
+
+    private double blend(double a, double b, double alpha) {
+        double x = alpha * Math.cos(a) + (1 - alpha) * Math.cos(b);
+        double y = alpha * Math.sin(a) + (1 - alpha) * Math.sin(b);
+        return Math.atan2(y, x);
+    }
+
+    // ------ Control -----------------------------------------------------------------------------
+
+    /*
+     * Nota: The power variable does not get uploaded in the commands, so it may be necessary to add
+     * a secondary math class for the specific robot calculations
+     *
+     * the power variable may be static
+     */
+
+    private double power = 1200;
+    private final Pose goal;
+    private final PoseTracker poseTracker;
+    private final ControlSystem flywheelController;
+
+    // ------ Constructor -------------------------------------------------------------------------
+
+    public RobotAPI(HardwareMap hardwareMap, PoseTracker poseTracker, Alliance alliance) {
+
+        setupIntake(hardwareMap);
+        buildOuttake(hardwareMap);
+        this.vision = new Limelight(hardwareMap, alliance);
+
+        this.goal = alliance == Alliance.BLUE ? FieldConfig.BLUE_GOAL : FieldConfig.RED_GOAL;
+        this.poseTracker = poseTracker;
+
+        this.flywheelController = RobotConfig.controller();
+    }
+
+    // ------ Public methods ----------------------------------------------------------------------
+
+    private boolean automatic = true;
+
+    public void update() {
+        if (automatic) automatic = false;
+    }
+
+    public void manual() {
+        this.automatic = false;
+        this.power = 1400;
+    }
+
+    // ------ Other -------------------------------------------------------------------------------
+
+    private static boolean roughlyEquals(double value, double target) {
+        return Math.abs(value) >= target - RobotConfig.SPINUP_THRESHOLD &&
+                Math.abs(value) <= target + RobotConfig.SPINUP_THRESHOLD;
     }
 }

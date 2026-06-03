@@ -13,6 +13,10 @@ public class FieldConfig {
     private static final double LEFT  = Math.toRadians(180);
     private static final double RIGHT = Math.toRadians(0);
 
+    private static final double LOW_Y  = 35;
+    private static final double MID_Y  = 58;
+    private static final double HIGH_Y = 83;
+
     // ----- Blue side ----------------------------------------------------------------------------
     public static Pose BLUE_GOAL         = new Pose(12, 132);
     public static Pose BLUE_HUMAN_PLAYER = new Pose(10, 9, LEFT);
@@ -23,19 +27,19 @@ public class FieldConfig {
     public static Pose BLUE_LOW_SHOT     = new Pose(56, 12, Math.toRadians(110));
     public static Pose BLUE_HIGH_SHOT    = new Pose(0, 0, 0);
 
-    public static Pose BLUE_LOW_PARK     = new Pose(36, 24, UP);
+    public static Pose BLUE_LOW_PARK     = new Pose(36, 12, UP);
     public static Pose BLUE_HIGH_PARK    = new Pose(0, 0, 0);
 
     public static Pose BLUE_PRE_GATE     = new Pose(20, 70, DOWN);
     public static Pose BLUE_GATE         = new Pose(16.5, 70, DOWN);
 
-    public static Pose BLUE_UP_ROW      = new Pose(20, 83, LEFT);
-    public static Pose BLUE_MID_ROW     = new Pose(20, 63, LEFT);
-    public static Pose BLUE_LOW_ROW     = new Pose(20, 38, LEFT);
+    public static Pose BLUE_UP_ROW      = new Pose(20, HIGH_Y, LEFT);
+    public static Pose BLUE_MID_ROW     = new Pose(16, MID_Y, LEFT);
+    public static Pose BLUE_LOW_ROW     = new Pose(16, LOW_Y, LEFT);
 
-    public static Pose BLUE_PRE_UP_ROW  = new Pose(39.5, 83, LEFT);
-    public static Pose BLUE_PRE_MID_ROW = new Pose(39.5, 63, LEFT);
-    public static Pose BLUE_PRE_LOW_ROW = new Pose(39.5, 38, LEFT);
+    public static Pose BLUE_PRE_UP_ROW  = new Pose(39.5, HIGH_Y, LEFT);
+    public static Pose BLUE_PRE_MID_ROW = new Pose(39.5, MID_Y, LEFT);
+    public static Pose BLUE_PRE_LOW_ROW = new Pose(39.5, LOW_Y, LEFT);
 
     public static Pose BLUE_CYCLE = new Pose(12, 50, Math.toRadians(120));
 
@@ -45,24 +49,24 @@ public class FieldConfig {
     public static Pose RED_HUMAN_PLAYER = new Pose(134, 9, RIGHT);
 
     public static Pose RED_LOW_START    = new Pose(88, 8, UP);
-    public static Pose RED_HIGH_START   = new Pose(0, 0, 0);
+    public static Pose RED_HIGH_START   = new Pose(113, 130, 126);
 
-    public static Pose RED_LOW_SHOT     = new Pose(128, 12, Math.toRadians(70));
-    public static Pose RED_HIGH_SHOT    = new Pose(0, 0, 0);
+    public static Pose RED_LOW_SHOT     = new Pose(88, 12, Math.toRadians(70));
+    public static Pose RED_HIGH_SHOT    = new Pose(85, 98, 45);
 
-    public static Pose RED_LOW_PARK     = new Pose(108, 24, UP);
-    public static Pose RED_HIGH_PARK    = new Pose(0, 0, 0);
+    public static Pose RED_LOW_PARK     = new Pose(108, 12, UP);
+    public static Pose RED_HIGH_PARK    = new Pose(80, 128, RIGHT);
 
     public static Pose RED_PRE_GATE     = new Pose(124, 70, DOWN);
     public static Pose RED_GATE         = new Pose(127.5, 70, DOWN);
 
-    public static Pose RED_UP_ROW      = new Pose(124, 83, LEFT);
-    public static Pose RED_MID_ROW     = new Pose(124, 63, LEFT);
-    public static Pose RED_LOW_ROW     = new Pose(124, 38, LEFT);
+    public static Pose RED_UP_ROW      = new Pose(124, HIGH_Y, RIGHT);
+    public static Pose RED_MID_ROW     = new Pose(128, MID_Y, RIGHT);
+    public static Pose RED_LOW_ROW     = new Pose(128, LOW_Y, RIGHT);
 
-    public static Pose RED_PRE_UP_ROW  = new Pose(104.5, 83, LEFT);
-    public static Pose RED_PRE_MID_ROW = new Pose(104.5, 63, LEFT);
-    public static Pose RED_PRE_LOW_ROW = new Pose(104.5, 38, LEFT);
+    public static Pose RED_PRE_UP_ROW  = new Pose(104.5, HIGH_Y, RIGHT);
+    public static Pose RED_PRE_MID_ROW = new Pose(104.5, MID_Y, RIGHT);
+    public static Pose RED_PRE_LOW_ROW = new Pose(104.5, LOW_Y, RIGHT);
 
     public static Pose RED_CYCLE = new Pose(134, 50, Math.toRadians(90));
 
