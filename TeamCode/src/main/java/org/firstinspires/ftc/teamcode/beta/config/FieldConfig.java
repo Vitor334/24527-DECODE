@@ -14,7 +14,7 @@ public class FieldConfig {
     private static final double RIGHT = Math.toRadians(0);
 
     private static final double LOW_Y  = 35;
-    private static final double MID_Y  = 58;
+    private static final double MID_Y  = 57;
     private static final double HIGH_Y = 83;
 
     // ----- Blue side ----------------------------------------------------------------------------
@@ -24,7 +24,7 @@ public class FieldConfig {
     public static Pose BLUE_LOW_START    = new Pose(56, 8, UP);
     public static Pose BLUE_HIGH_START   = new Pose(0, 0, 0);
 
-    public static Pose BLUE_LOW_SHOT     = new Pose(56, 12, Math.toRadians(110));
+    public static Pose BLUE_LOW_SHOT     = new Pose(54, 12, Math.toRadians(110));
     public static Pose BLUE_HIGH_SHOT    = new Pose(0, 0, 0);
 
     public static Pose BLUE_LOW_PARK     = new Pose(36, 12, UP);
@@ -51,7 +51,7 @@ public class FieldConfig {
     public static Pose RED_LOW_START    = new Pose(88, 8, UP);
     public static Pose RED_HIGH_START   = new Pose(113, 130, 126);
 
-    public static Pose RED_LOW_SHOT     = new Pose(88, 12, Math.toRadians(70));
+    public static Pose RED_LOW_SHOT     = new Pose(90, 12, Math.toRadians(66));
     public static Pose RED_HIGH_SHOT    = new Pose(85, 98, 45);
 
     public static Pose RED_LOW_PARK     = new Pose(108, 12, UP);

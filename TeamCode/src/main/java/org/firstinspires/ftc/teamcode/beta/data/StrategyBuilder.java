@@ -65,13 +65,29 @@ public class StrategyBuilder {
 
     // ------ PUBLIC API --------------------------------------------------------------------------
 
-    private static double FAR_VEL = 1650;
+    private static double FAR_VEL = 1630;
     private static double IDLE    = 1000;
 
     public Command lowPreload() {
         return sequential(
                 followPath(lowStart, lowShot),
                 robot.shoot(FAR_VEL, 6000, 0.35),
+                followPath(lowShot, lowPark)
+        );
+    }
+
+    public Command lowSupport() {
+        return sequential(
+                followPath(lowStart, lowShot),
+                robot.shoot(FAR_VEL, 6000, 0.35),
+                deadline(
+                        sequential(
+                                followPath(midRow, preMidRow),
+                                followPath(preLowRow, lowShot)
+                        ),
+                        robot.run(FAR_VEL + 150)
+                ),
+                robot.shoot(FAR_VEL, 2000, 0.35),
                 followPath(lowShot, lowPark)
         );
     }
@@ -112,6 +128,28 @@ public class StrategyBuilder {
                         robot.run(FAR_VEL + 150)
                 ),
                 robot.shoot(FAR_VEL, 2000, 0.35),
+                followPath(lowShot, lowPark)
+        );
+    }
+
+    public Command lowFarm() {
+        return sequential(
+                deadline(
+                        followPath(lowStart, lowShot),
+                        robot.run(2150)
+                ),
+                robot.shoot(FAR_VEL, 3500, 0.35),
+                repeat(
+                        sequential(
+                                deadline(
+                                        followPath(lowShot, humanPlayer),
+                                        robot.intakeCommand,
+                                        robot.run(FAR_VEL + 150)
+                                ),
+                                robot.shoot(FAR_VEL, 2000, 0.35)
+                        ),
+                        5
+                ),
                 followPath(lowShot, lowPark)
         );
     }

@@ -15,8 +15,8 @@ public class Flywheel implements Outtake {
     private final Servo gate;
 
     public Flywheel(HardwareMap hardwareMap) {
-        leftFlywheel = hardwareMap.get(DcMotorEx.class, "leftFlywheel");
-        rightFlywheel = hardwareMap.get(DcMotorEx.class, "rightFlywheel");
+        leftFlywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+        rightFlywheel = hardwareMap.get(DcMotorEx.class, "flywheel2");
 
         leftFlywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFlywheel.setDirection(DcMotorSimple.Direction.FORWARD);
